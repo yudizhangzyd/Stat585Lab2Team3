@@ -1,0 +1,55 @@
+---
+title: ''
+author: "Hao Wang, Yones Khaledian, Yudi Zhang"
+date: "2/20/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+library(sf)
+library(ggspatial)
+library(maps)
+library(tidyverse)
+library(plyr)
+```
+
+```{r}
+cities <- read_sf("data/ME-GIS/Cities.shp")
+p <- ggplot() +
+  geom_sf(data = read_sf("data/ME-GIS/Coastline2.shp"), 
+          colour="grey10", fill="grey90") +
+  geom_sf(data = read_sf("data/ME-GIS/Rivers19.shp"), 
+          colour="steelblue", size=0.3) +
+  geom_sf(data = read_sf("data/ME-GIS/PrimaryRoads.shp"), 
+          size = 0.7, colour="grey30") +
+  geom_sf(data = read_sf("data/ME-GIS/Cities.shp")) +
+  geom_sf_text(aes(label = cities$Name), data = cities, size = 4) +
+  annotation_scale() +
+  annotation_north_arrow(which_north = "true") +
+  theme_bw()
+p
+```
+```{r}
+ozbig <- read_sf("data/gadm36_AUS_shp/gadm36_AUS_1.shp")
+oz_st <- maptools::thinnedSpatialPoly(
+  as(ozbig, "Spatial"), tolerance = 0.1, 
+  minarea = 0.001, topologyPreserve = TRUE)
+oz <- st_as_sf(oz_st)
+ozplus <- oz$geometry %>% 
+  flatten() %>% 
+  flatten() %>% 
+  lapply(., as.data.frame) %>% 
+  bind_rows() %>% 
+  rename(., c("x" ="long", "y" = "lat"))
+temp <- oz$geometry %>% 
+  flatten() %>% 
+  flatten() %>% 
+  lapply(., nrow) %>% 
+  unlist
+ozplus$group <- rep(1 : length(temp), temp)
+
+ozplus %>% 
+```
+
