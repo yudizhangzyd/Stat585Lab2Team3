@@ -32,26 +32,36 @@ p <- ggplot() +
 p
 ```
 ```{r}
-ozbig <- read_sf("data/gadm36_AUS_shp/gadm36_AUS_1.shp")
-oz_st <- maptools::thinnedSpatialPoly(
-  as(ozbig, "Spatial"), tolerance = 0.1, 
-  minarea = 0.001, topologyPreserve = TRUE)
-oz <- st_as_sf(oz_st)
-ozplus <- oz$geometry %>% 
-  flatten() %>% 
-  flatten() %>% 
-  lapply(., as.data.frame) %>% 
-  bind_rows() %>% 
-  rename(., c("x" ="long", "y" = "lat"))
-temp <- oz$geometry %>% 
-  flatten() %>% 
-  flatten() %>% 
-  lapply(., nrow) %>% 
-  unlist
-ozplus$group <- rep(1 : length(temp), temp)
+drawmap <- function(dat) 
+{
+  con_big <- read_sf(dat)
+  con_st <- maptools::thinnedSpatialPoly(
+    as(con_big, "Spatial"), tolerance = 0.1, 
+    minarea = 0.001, topologyPreserve = TRUE)
+  con <- st_as_sf(con_st)
+  con_plus <- con$geometry %>% 
+    flatten() %>% 
+    flatten() %>% 
+    lapply(., as.data.frame) %>% 
+    bind_rows() %>% 
+    rename(., c("x" ="long", "y" = "lat"))
+  temp <- con$geometry %>% 
+    flatten() %>% 
+    flatten() %>% 
+    lapply(., nrow) %>% 
+    unlist
+  con_plus$group <- rep(1 : length(temp), temp)
 
-ozplus %>% 
-  ggplot(aes(x = long, y = lat, group = group)) + 
-  geom_polygon()
+  con_plus %>% 
+    ggplot(aes(x = long, y = lat, group = group)) + 
+    geom_polygon()
+}
+```
+
+```{r}
+#AU
+drawmap(dat = "data/gadm36_AUS_shp/gadm36_AUS_1.shp")
+#China
+drawmap(dat = "data/gadm36_CHN_shp/gadm36_CHN_1.shp")
 ```
 
